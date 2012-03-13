@@ -1,0 +1,22 @@
+#!/bin/bash
+
+HOST=$1
+PORT=$2
+
+proxyserver="proxy.wdf.sap.corp"
+proxyport="8080"
+
+pinghost="10.28.192.35"
+pingtimeout=2
+pingcount=1
+
+ping $pinghost -c $pingcount -W $pingtimeout > /dev/null
+PING=$?
+if [[ $PING -eq 0 ]] 
+then 
+	# ping succeeded
+	exec corkscrew $proxyserver $proxyport $HOST $PORT
+else
+	# ping did not succeed
+	exec netcat $HOST $PORT
+fi
