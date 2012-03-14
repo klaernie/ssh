@@ -3,6 +3,7 @@
 HOST=$1
 PORT=$2
 
+proxycommand="corkscrew"
 proxyserver="proxy.wdf.sap.corp"
 proxyport="8080"
 
@@ -10,13 +11,24 @@ pinghost="10.28.192.35"
 pingtimeout=2
 pingcount=1
 
-ping $pinghost -c $pingcount -W $pingtimeout > /dev/null
-PING=$?
-if [[ $PING -eq 0 ]] 
-then 
+if which $proxycommand >/dev/null 2>&1 ; then
+	# execute the test only if it is possible to proxy
+	# -> on a system without $proxycommand it will always use netcat
+
+	ping $pinghost -c $pingcount -W $pingtimeout > /dev/null
+	PING=$?
+else
+	echo "$0: proxy-command $proxycommand was not found. Failing back to direct connection" >&2
+	PING=255
+fi
+
+if [[ $PING -eq 0 ]] ; then
 	# ping succeeded
 	exec corkscrew $proxyserver $proxyport $HOST $PORT
 else
 	# ping did not succeed
-	exec netcat $HOST $PORT
+	which netcat >/dev/null 2>&1 && exec netcat $HOST $PORT
+	# if the further gets executed netcat is not available
+	echo "$0: can't connect directly as netcat is not available!" >&2
+	exit 255
 fi
