@@ -1,7 +1,8 @@
-#!/bin/bash
+#!/bin/bash -x
 
 HOST=$1
 PORT=$2
+notunPORT=$3
 
 proxycommand="corkscrew"
 proxyserver="proxy.wdf.sap.corp"
@@ -27,6 +28,9 @@ if [[ $PING -eq 0 ]] ; then
 	exec corkscrew $proxyserver $proxyport $HOST $PORT
 else
 	# ping did not succeed
+
+	[[ -n "$notunPORT" ]] && PORT="$notunPORT"
+
 	which netcat >/dev/null 2>&1 && exec netcat $HOST $PORT
 	# if the further gets executed netcat is not available
 	echo "$0: can't connect directly as netcat is not available!" >&2
