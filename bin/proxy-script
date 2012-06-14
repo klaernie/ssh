@@ -39,7 +39,7 @@ fi
 
 if [[ $PING -eq 0 ]] ; then
 	# ping succeeded
-	exec corkscrew $proxyserver $proxyport $HOST $PORT
+	exec $proxycommand $proxyserver $proxyport $HOST $PORT
 else
 	# ping did not succeed
 
